@@ -149,18 +149,26 @@ class _ProjectGraphPainter extends CustomPainter {
       }
     }
 
-    // --- area fill (drawn from full path, opacity indicates progress) --------
+    // --- area fill with gradient (drawn from full path) ----------------------
     if (progress > 0) {
       final areaPath = Path.from(fullPath)
         ..lineTo(chart.right, chart.bottom)
         ..lineTo(chart.left, chart.bottom)
         ..close();
-      canvas.drawPath(
-        areaPath,
-        Paint()
-          ..color = AppColors.primaryBlue.withValues(alpha: 0.06 * progress)
-          ..style = PaintingStyle.fill,
-      );
+
+      final gradientPaint = Paint()
+        ..style = PaintingStyle.fill
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryBlue.withValues(alpha: 0.10 * progress),
+            AppColors.primaryBlue.withValues(alpha: 0.01 * progress),
+          ],
+        ).createShader(Rect.fromLTWH(
+            chart.left, chart.top, chart.width, chart.height));
+
+      canvas.drawPath(areaPath, gradientPaint);
     }
 
     // --- trimmed line (left → right) ----------------------------------------
@@ -171,7 +179,7 @@ class _ProjectGraphPainter extends CustomPainter {
         Paint()
           ..color = AppColors.primaryBlue
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.8
+          ..strokeWidth = 2.5
           ..strokeCap = StrokeCap.round
           ..strokeJoin = StrokeJoin.round,
       );
@@ -208,19 +216,38 @@ class _ProjectGraphPainter extends CustomPainter {
           gapLength: 3,
         );
 
-        // Halo
+        // Outer glow halo
         canvas.drawCircle(
           Offset(highlightX, highlightY),
-          13.0 * pulse * guideOpacity,
+          14.0 * pulse * guideOpacity,
           Paint()
-            ..color =
-                AppColors.primaryBlue.withValues(alpha: 0.18 * guideOpacity),
+            ..color = AppColors.primaryBlue
+                .withValues(alpha: 0.12 * guideOpacity),
+        );
+
+        // Mid halo
+        canvas.drawCircle(
+          Offset(highlightX, highlightY),
+          9.0 * guideOpacity,
+          Paint()
+            ..color = AppColors.primaryBlue
+                .withValues(alpha: 0.20 * guideOpacity),
+        );
+
+        // White ring
+        canvas.drawCircle(
+          Offset(highlightX, highlightY),
+          5.5,
+          Paint()
+            ..color = Colors.white.withValues(alpha: guideOpacity)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
         );
 
         // Solid center dot
         canvas.drawCircle(
           Offset(highlightX, highlightY),
-          5.5,
+          3.5,
           Paint()
             ..color = AppColors.primaryBlue
                 .withValues(alpha: guideOpacity),

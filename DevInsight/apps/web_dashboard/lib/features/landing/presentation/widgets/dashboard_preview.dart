@@ -28,13 +28,13 @@ class _DashboardPreviewState extends State<DashboardPreview>
     super.initState();
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 700),
     );
     _opacity = CurvedAnimation(
       parent: _entranceController,
       curve: Curves.easeOutCubic,
     );
-    _translateY = Tween<double>(begin: 18, end: 0).animate(
+    _translateY = Tween<double>(begin: 24, end: 0).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
     _entranceController.forward();
@@ -77,13 +77,18 @@ class _DashboardWindow extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFFF9FBFF),
-          border: Border.all(color: const Color(0xFFDDE7F6)),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
+          border: Border.all(color: const Color(0xFFDDE7F6), width: 1.5),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x1A0664F2),
-              blurRadius: 32,
-              offset: Offset(0, 14),
+              color: AppColors.primaryBlue.withValues(alpha: 0.10),
+              blurRadius: 48,
+              offset: const Offset(0, 20),
+            ),
+            BoxShadow(
+              color: const Color(0xFF000000).withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -111,27 +116,44 @@ class _DashboardWindow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Top bar (three dots)
+// Top bar (three dots + fake URL bar)
 // ---------------------------------------------------------------------------
 
 class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 34,
+      height: 36,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE2EAF5))),
+        border: Border(bottom: BorderSide(color: Color(0xFFE4EDF8))),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [
-          _WindowDot(color: Color(0xFFAFC1DD)),
-          SizedBox(width: 7),
-          _WindowDot(color: Color(0xFFAFC1DD)),
-          SizedBox(width: 7),
-          _WindowDot(color: Color(0xFFAFC1DD)),
+        children: [
+          const _WindowDot(color: Color(0xFFFF5F57)),
+          const SizedBox(width: 6),
+          const _WindowDot(color: Color(0xFFFFBD2E)),
+          const SizedBox(width: 6),
+          const _WindowDot(color: Color(0xFF28C840)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Container(
+              height: 20,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F4FC),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: const Color(0xFFDDE7F6)),
+              ),
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: const Text(
+                'devinsight.app/dashboard',
+                style: TextStyle(color: Color(0xFF8EA8CC), fontSize: 9.5),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -145,7 +167,7 @@ class _WindowDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        child: const SizedBox(width: 8, height: 8),
+        child: const SizedBox(width: 9, height: 9),
       );
 }
 
@@ -159,14 +181,14 @@ class _Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 54,
+      width: 52,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(right: BorderSide(color: Color(0xFFE2EAF5))),
+        border: Border(right: BorderSide(color: Color(0xFFE4EDF8))),
       ),
       child: const Column(
         children: [
-          SizedBox(height: 18),
+          SizedBox(height: 16),
           _SideIcon(icon: Icons.home_rounded, active: true),
           _SideIcon(icon: Icons.bar_chart_rounded),
           _SideIcon(icon: Icons.code_rounded),
@@ -185,17 +207,17 @@ class _SideIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
+      margin: const EdgeInsets.only(bottom: 6, left: 6, right: 6),
       decoration: BoxDecoration(
-        color: active ? const Color(0xFFE1EDFF) : Colors.transparent,
+        color: active ? const Color(0xFFE6EFFF) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: IconButton(
         onPressed: null,
         icon: Icon(
           icon,
-          color: active ? AppColors.primaryBlue : const Color(0xFF7890B6),
-          size: 20,
+          color: active ? AppColors.primaryBlue : const Color(0xFF8EA8CC),
+          size: 19,
         ),
         padding: const EdgeInsets.all(8),
         constraints: const BoxConstraints(),
@@ -212,25 +234,26 @@ class _MainContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Project Overview card — fixed height so graph always has room
-          SizedBox(
-            height: 210,
+          // Chart card takes ~70% of available height via flex
+          Expanded(
+            flex: 7,
             child: _ChartCard(),
           ),
-          const SizedBox(height: 10),
-          // Metric cards fill remaining height
+          const SizedBox(height: 8),
+          // Metric cards take ~30% of available height
           Expanded(
+            flex: 3,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: const [
                 Expanded(child: _RiskCard()),
-                SizedBox(width: 8),
+                SizedBox(width: 7),
                 Expanded(child: _CompletionCard()),
-                SizedBox(width: 8),
+                SizedBox(width: 7),
                 Expanded(child: _IssuesCard()),
               ],
             ),
@@ -251,22 +274,26 @@ class _ChartCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE7EEF8)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE4EDF8)),
       ),
       child: const Padding(
         padding: EdgeInsets.fromLTRB(14, 12, 14, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Project Overview',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF152846),
+            Row(children: [
+              Text(
+                'Project Overview',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF152846),
+                ),
               ),
-            ),
+              Spacer(),
+              _TrendBadge(),
+            ]),
             SizedBox(height: 5),
             // Expanded fills whatever height remains inside the 210px SizedBox
             Expanded(child: AnimatedProjectGraph()),
@@ -275,6 +302,29 @@ class _ChartCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TrendBadge extends StatelessWidget {
+  const _TrendBadge();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFECFDF5),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFBBF7D0)),
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.trending_up_rounded, color: Color(0xFF059669), size: 11),
+          SizedBox(width: 3),
+          Text('+12.4%',
+              style: TextStyle(
+                  color: Color(0xFF059669),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700)),
+        ]),
+      );
 }
 
 // ---------------------------------------------------------------------------
@@ -289,20 +339,19 @@ class _RiskCard extends StatelessWidget {
         label: 'Risk Score',
         value: 72,
         suffix: '',
-        trailing: DecoratedBox(
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
           decoration: BoxDecoration(
             color: const Color(0xFFFFE9D9),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFFDC29A)),
           ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Text(
-              'High',
-              style: TextStyle(
-                color: Color(0xFFFF7416),
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-              ),
+          child: const Text(
+            'High',
+            style: TextStyle(
+              color: Color(0xFFFF7416),
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -318,8 +367,8 @@ class _CompletionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: const Color(0xFFE7EEF8)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE4EDF8)),
       ),
       padding: const EdgeInsets.all(10),
       child: Column(
@@ -329,7 +378,7 @@ class _CompletionCard extends StatelessWidget {
             'Completion',
             style: TextStyle(
               color: AppColors.slateText,
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -346,17 +395,18 @@ class _CompletionCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 7),
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: 0.68),
             duration: const Duration(milliseconds: 1300),
             builder: (context, v, _) => ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               child: LinearProgressIndicator(
                 value: v,
-                minHeight: 5,
-                backgroundColor: const Color(0xFFE0E8F5),
-                color: AppColors.primaryBlue,
+                minHeight: 4,
+                backgroundColor: const Color(0xFFDEE9F8),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryBlue),
               ),
             ),
           ),
@@ -374,10 +424,18 @@ class _IssuesCard extends StatelessWidget {
         label: 'Open Issues',
         value: 134,
         suffix: '',
-        trailing: const Icon(
-          Icons.description_outlined,
-          color: Color(0xFFFF7A21),
-          size: 22,
+        trailing: Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF3EA),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: const Color(0xFFFDC29A)),
+          ),
+          child: const Icon(
+            Icons.warning_amber_rounded,
+            color: Color(0xFFFF7416),
+            size: 14,
+          ),
         ),
         animationDuration: const Duration(milliseconds: 1400),
       );
@@ -407,8 +465,8 @@ class _MetricCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: const Color(0xFFE7EEF8)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE4EDF8)),
       ),
       padding: const EdgeInsets.all(10),
       child: Column(
@@ -418,7 +476,7 @@ class _MetricCard extends StatelessWidget {
             label,
             style: const TextStyle(
               color: AppColors.slateText,
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: FontWeight.w600,
             ),
           ),
