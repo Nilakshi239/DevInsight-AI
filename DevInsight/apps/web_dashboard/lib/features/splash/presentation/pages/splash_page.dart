@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../shared/backgrounds/animated_aura_background.dart';
 import '../widgets/splash_loader.dart';
-import '../widgets/splash_video_background.dart';
 
 enum _SplashConnectionState { checking, offline }
 
@@ -149,6 +149,7 @@ class _SplashPageState extends State<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isCompact = constraints.maxWidth < 700;
@@ -160,11 +161,8 @@ class _SplashPageState extends State<SplashPage>
             fit: StackFit.expand,
             children: [
               const Positioned.fill(
-                child: SplashVideoBackground(),
-              ),
-              Positioned.fill(
-                child: ColoredBox(
-                  color: Colors.white.withValues(alpha: 0.18),
+                child: AnimatedAuraBackground(
+                  variant: AuraBackgroundVariant.splash,
                 ),
               ),
               Center(
