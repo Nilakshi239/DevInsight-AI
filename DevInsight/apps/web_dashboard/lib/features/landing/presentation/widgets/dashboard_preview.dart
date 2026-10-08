@@ -373,6 +373,7 @@ class _CompletionCard extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Completion',
@@ -382,7 +383,7 @@ class _CompletionCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 8),
           TweenAnimationBuilder<int>(
             tween: IntTween(begin: 0, end: 68),
             duration: const Duration(milliseconds: 1200),
@@ -471,6 +472,7 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
@@ -480,7 +482,7 @@ class _MetricCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -488,16 +490,21 @@ class _MetricCard extends StatelessWidget {
                 child: TweenAnimationBuilder<int>(
                   tween: IntTween(begin: 0, end: value),
                   duration: animationDuration,
-                  builder: (context, v, _) => Text(
-                    '$v$suffix',
-                    style: const TextStyle(
-                      color: Color(0xFF10233E),
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
+                  builder: (context, v, _) => FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '$v$suffix',
+                      style: const TextStyle(
+                        color: Color(0xFF10233E),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               trailing,
             ],
           ),

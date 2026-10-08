@@ -398,7 +398,9 @@ class CtaSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: const Color(0xCCFAF8F2),
+      // CHANGED: was Color(0xCCFAF8F2) (beige). Now transparent so the
+      // new blue/white background shows through.
+      color: Colors.transparent,
       child: Stack(
         children: [
           Padding(
@@ -470,7 +472,8 @@ class LandingFooter extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xD9FAF8F2),
+        // CHANGED: was Color(0xD9FAF8F2) (beige). Now soft white.
+        color: Color(0xB3FFFFFF),
         border: Border(top: BorderSide(color: Color(0xFFE2EAF5))),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
