@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/connectivity_service.dart';
-import '../../../../shared/backgrounds/animated_aura_background.dart';
+// CHANGED: removed animated_aura_background import, added AppBackground
+import '../../../landing/presentation/widgets/app_background.dart';
 import '../widgets/splash_loader.dart';
 
 enum _SplashConnectionState { checking, offline }
@@ -157,88 +158,80 @@ class _SplashPageState extends State<SplashPage>
           final titleSize = isCompact ? 50.0 : 68.0;
           final subtitleSize = isCompact ? 18.0 : 22.0;
 
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              const Positioned.fill(
-                child: AnimatedAuraBackground(
-                  variant: AuraBackgroundVariant.splash,
-                ),
-              ),
-              Center(
-                child: FadeTransition(
-                  opacity: _fadeController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isCompact ? 420 : 760,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Semantics(
-                          label: 'DevInsight logo',
-                          image: true,
-                          child: Image.asset(
-                            AppAssets.devInsightLogo,
-                            width: logoSize,
-                            height: logoSize,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
-                            semanticLabel: 'DevInsight logo',
-                          ),
+          // CHANGED: AppBackground now paints the background and holds the
+          // content. The old AnimatedAuraBackground layer was removed.
+          return AppBackground(
+            child: Center(
+              child: FadeTransition(
+                opacity: _fadeController,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isCompact ? 420 : 760),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Semantics(
+                        label: 'DevInsight logo',
+                        image: true,
+                        child: Image.asset(
+                          AppAssets.devInsightLogo,
+                          width: logoSize,
+                          height: logoSize,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                          semanticLabel: 'DevInsight logo',
                         ),
-                        const SizedBox(height: 18),
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Dev',
-                                style: TextStyle(
-                                  color: AppColors.black,
-                                  fontSize: titleSize,
-                                  fontWeight: FontWeight.w800,
-                                  fontFamily: 'sans-serif',
-                                  letterSpacing: -1.4,
-                                  height: 2,
-                                ),
+                      ),
+                      const SizedBox(height: 18),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Dev',
+                              style: TextStyle(
+                                color: AppColors.black,
+                                fontSize: titleSize,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'sans-serif',
+                                letterSpacing: -1.4,
+                                height: 2,
                               ),
-                              TextSpan(
-                                text: 'Insight',
-                                style: TextStyle(
-                                  color: AppColors.primaryBlue,
-                                  fontSize: titleSize,
-                                  fontWeight: FontWeight.w800,
-                                  fontFamily: 'sans-serif',
-                                  letterSpacing: -1.4,
-                                  height: 2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'AI-Powered intelligence for Smarter Software Projects',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.slateText,
-                              fontSize: subtitleSize,
-                              fontWeight: FontWeight.w500,
-                              height: 1.35,
-                              fontFamily: 'sans-serif',
                             ),
+                            TextSpan(
+                              text: 'Insight',
+                              style: TextStyle(
+                                color: AppColors.primaryBlue,
+                                fontSize: titleSize,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'sans-serif',
+                                letterSpacing: -1.4,
+                                height: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'AI-Powered intelligence for Smarter Software Projects',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.slateText,
+                            fontSize: subtitleSize,
+                            fontWeight: FontWeight.w500,
+                            height: 1.35,
+                            fontFamily: 'sans-serif',
                           ),
                         ),
-                        const SizedBox(height: 54),
-                        _buildLoadingArea(isCompact: isCompact),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 54),
+                      _buildLoadingArea(isCompact: isCompact),
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           );
         },
       ),

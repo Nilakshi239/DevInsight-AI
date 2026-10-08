@@ -4,15 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/backgrounds/animated_aura_background.dart';
+// CHANGED: removed animated_aura_background import, added AppBackground
+import '../widgets/app_background.dart';
 import '../widgets/dashboard_preview.dart';
 import '../widgets/landing_sections.dart';
-
-final GlobalKey featuresSectionKey = GlobalKey();
-final GlobalKey howItWorksSectionKey = GlobalKey();
-final GlobalKey researchSectionKey = GlobalKey();
-final GlobalKey aboutSectionKey = GlobalKey();
-final GlobalKey ctaSectionKey = GlobalKey();
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -22,20 +17,31 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
+  late final GlobalKey featuresSectionKey;
+  late final GlobalKey howItWorksSectionKey;
+  late final GlobalKey researchSectionKey;
+  late final GlobalKey aboutSectionKey;
+  late final GlobalKey ctaSectionKey;
+  late final List<GlobalKey> _sectionKeys;
+
   final ScrollController _scrollController = ScrollController();
   int _activeSection = 0;
-
-  final _sectionKeys = <GlobalKey>[
-    GlobalKey(),
-    featuresSectionKey,
-    howItWorksSectionKey,
-    researchSectionKey,
-    aboutSectionKey,
-  ];
 
   @override
   void initState() {
     super.initState();
+    featuresSectionKey = GlobalKey();
+    howItWorksSectionKey = GlobalKey();
+    researchSectionKey = GlobalKey();
+    aboutSectionKey = GlobalKey();
+    ctaSectionKey = GlobalKey();
+    _sectionKeys = <GlobalKey>[
+      GlobalKey(),
+      featuresSectionKey,
+      howItWorksSectionKey,
+      researchSectionKey,
+      aboutSectionKey,
+    ];
     _scrollController.addListener(_updateActiveSection);
   }
 
@@ -75,52 +81,46 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const Positioned.fill(
-            child: AnimatedAuraBackground(
-              variant: AuraBackgroundVariant.landing,
+      // CHANGED: AppBackground replaces the old Stack + AnimatedAuraBackground.
+      // The background stays fixed while the CustomScrollView scrolls on top.
+      body: AppBackground(
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _NavbarDelegate(
+                activeSection: _activeSection,
+                onNavigate: (index) => _scrollTo(_sectionKeys[index]),
+              ),
             ),
-          ),
-          CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _NavbarDelegate(
-                  activeSection: _activeSection,
-                  onNavigate: (index) => _scrollTo(_sectionKeys[index]),
-                ),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  _HeroSection(),
+                  FeaturesSection(key: featuresSectionKey),
+                  HowItWorksSection(key: howItWorksSectionKey),
+                  ResearchSection(
+                    key: researchSectionKey,
+                    onLearnMore: () => _scrollTo(aboutSectionKey),
+                  ),
+                  AboutSection(key: aboutSectionKey),
+                  CtaSection(
+                    key: ctaSectionKey,
+                    onGetStarted: () => _scrollTo(featuresSectionKey),
+                    onSignIn: () {},
+                  ),
+                  LandingFooter(
+                    onFeatures: () => _scrollTo(featuresSectionKey),
+                    onHowItWorks: () => _scrollTo(howItWorksSectionKey),
+                    onResearch: () => _scrollTo(researchSectionKey),
+                    onAbout: () => _scrollTo(aboutSectionKey),
+                  ),
+                ],
               ),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    _HeroSection(),
-                    FeaturesSection(key: featuresSectionKey),
-                    HowItWorksSection(key: howItWorksSectionKey),
-                    ResearchSection(
-                      key: researchSectionKey,
-                      onLearnMore: () => _scrollTo(aboutSectionKey),
-                    ),
-                    AboutSection(key: aboutSectionKey),
-                    CtaSection(
-                      key: ctaSectionKey,
-                      onGetStarted: () => _scrollTo(featuresSectionKey),
-                      onSignIn: () {},
-                    ),
-                    LandingFooter(
-                      onFeatures: () => _scrollTo(featuresSectionKey),
-                      onHowItWorks: () => _scrollTo(howItWorksSectionKey),
-                      onResearch: () => _scrollTo(researchSectionKey),
-                      onAbout: () => _scrollTo(aboutSectionKey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -157,7 +157,9 @@ class _NavbarDelegate extends SliverPersistentHeaderDelegate {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
+            // CHANGED: transparent at the top (like the Figma), frosted white
+            // once the page is scrolled under the navbar.
+            color: Colors.white.withValues(alpha: overlapsContent ? 0.85 : 0.0),
             border: overlapsContent
                 ? const Border(
                     bottom: BorderSide(color: Color(0xFFEAEEF5), width: 1),
