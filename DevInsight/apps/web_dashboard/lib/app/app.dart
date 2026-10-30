@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
+import '../features/Login/Pages/Login.dart';
 import '../features/landing/presentation/pages/landing_page.dart';
+import '../features/signup/presentation/pages/signup_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 
 class App extends StatelessWidget {
@@ -20,6 +22,8 @@ class App extends StatelessWidget {
       home: const SplashPage(),
       routes: {
         '/landing': (_) => const LandingPage(),
+        '/login': (_) => const LoginPage(),
+        '/signup': (_) => const SignUpPage(),
       },
     );
   }

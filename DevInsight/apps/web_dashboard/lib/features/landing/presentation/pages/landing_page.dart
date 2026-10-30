@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -108,7 +109,7 @@ class _LandingPageState extends State<LandingPage> {
                   CtaSection(
                     key: ctaSectionKey,
                     onGetStarted: () => _scrollTo(featuresSectionKey),
-                    onSignIn: () {},
+                    onSignIn: () => Navigator.of(context).pushNamed('/login'),
                   ),
                   LandingFooter(
                     onFeatures: () => _scrollTo(featuresSectionKey),
@@ -214,7 +215,7 @@ class _LandingNav extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _Wordmark(),
+                _Wordmark(onTap: () => onNavigate(0)),
                 const Spacer(),
                 if (!isMobile) ...[
                   _NavText('Features', 1, activeSection, () => onNavigate(1)),
@@ -227,7 +228,12 @@ class _LandingNav extends StatelessWidget {
                   _NavText('Research', 3, activeSection, () => onNavigate(3)),
                   _NavText('About Us', 4, activeSection, () => onNavigate(4)),
                   const SizedBox(width: 42),
-                  _NavText('Sign in', -1, activeSection, () {}),
+                  _NavText(
+                    'Sign in',
+                    -1,
+                    activeSection,
+                    () => Navigator.of(context).pushNamed('/login'),
+                  ),
                   const SizedBox(width: 18),
                 ] else
                   IconButton(
@@ -251,9 +257,12 @@ class _LandingNav extends StatelessWidget {
 }
 
 class _Wordmark extends StatelessWidget {
+  const _Wordmark({this.onTap});
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final row = Row(
       children: [
         Image.asset(AppAssets.devInsightLogo, width: 42, height: 42),
         const SizedBox(width: 9),
@@ -281,8 +290,20 @@ class _Wordmark extends StatelessWidget {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          child: row,
+        ),
+      );
+    }
+    return row;
   }
 }
+
 
 class _NavText extends StatelessWidget {
   const _NavText(this.text, this.index, this.active, this.onPressed);
@@ -424,8 +445,14 @@ class _HeroCopy extends StatelessWidget {
             spacing: 16,
             runSpacing: 12,
             children: [
-              _ActionButton(label: 'Get Started  →', onPressed: () {}),
-              _GhostButton(label: 'Sign in', onPressed: () {}),
+              _ActionButton(
+                label: 'Get Started  →',
+                onPressed: () => Navigator.of(context).pushNamed('/signup'),
+              ),
+              _GhostButton(
+                label: 'Sign in',
+                onPressed: () => Navigator.of(context).pushNamed('/login'),
+              ),
             ],
           ),
         ],
@@ -434,8 +461,15 @@ class _HeroCopy extends StatelessWidget {
   }
 }
 
-class _PreviewArea extends StatelessWidget {
+class _PreviewArea extends StatefulWidget {
   const _PreviewArea();
+
+  @override
+  State<_PreviewArea> createState() => _PreviewAreaState();
+}
+
+class _PreviewAreaState extends State<_PreviewArea> {
+  int _activeTab = 0; // 0 = Live Dashboard, 1 = AI Synergy
 
   @override
   Widget build(BuildContext context) {
@@ -443,11 +477,216 @@ class _PreviewArea extends StatelessWidget {
       alignment: Alignment.center,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 680),
-        child: const AspectRatio(aspectRatio: 1.7, child: DashboardPreview()),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Segmented Switcher Pill
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.90),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildTabButton(
+                    title: 'Live Dashboard',
+                    icon: Icons.dashboard_customize_outlined,
+                    isActive: _activeTab == 0,
+                    onTap: () => setState(() => _activeTab = 0),
+                  ),
+                  _buildTabButton(
+                    title: 'AI Synergy Core',
+                    icon: Icons.auto_awesome_rounded,
+                    isActive: _activeTab == 1,
+                    onTap: () => setState(() => _activeTab = 1),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            AspectRatio(
+              aspectRatio: 1.7,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _activeTab == 0
+                    ? const DashboardPreview(key: ValueKey('dashboard'))
+                    : _buildAiTouchPreview(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton({
+    required String title,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primaryBlue : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isActive ? Colors.white : const Color(0xFF64748B),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: GoogleFonts.plusJakartaSans(
+                color: isActive ? Colors.white : const Color(0xFF64748B),
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiTouchPreview() {
+    return Container(
+      key: const ValueKey('ai_touch'),
+      decoration: BoxDecoration(
+        color: const Color(0xFF070B14),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF1E293B), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0664F2).withValues(alpha: 0.22),
+            blurRadius: 40,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            AppAssets.landingAiTouch,
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            filterQuality: FilterQuality.high,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.35),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.75),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A).withValues(alpha: 0.88),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF38BDF8).withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF38BDF8),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Human Intuition × Machine Learning',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Engineering Co-Pilot Online',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0664F2).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF0664F2)),
+                  ),
+                  child: Text(
+                    'DevInsight Core',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: const Color(0xFF93C5FD),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
 
 // ---------------------------------------------------------------------------
 // Buttons
