@@ -10,7 +10,12 @@ import '../widgets/splash_loader.dart';
 enum _SplashConnectionState { checking, offline }
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({super.key});
+  const SplashPage({
+    super.key,
+    ConnectivityService? connectivityService,
+  }) : _connectivityService = connectivityService ?? const ConnectivityService();
+
+  final ConnectivityService _connectivityService;
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -19,10 +24,11 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
-  final ConnectivityService _connectivityService = const ConnectivityService();
   _SplashConnectionState _connectionState = _SplashConnectionState.checking;
   bool _checkInProgress = false;
   bool _hasNavigated = false;
+
+  ConnectivityService get _connectivityService => widget._connectivityService;
 
   @override
   void initState() {
@@ -54,17 +60,19 @@ class _SplashPageState extends State<SplashPage>
     await minimumSplash;
 
     if (!mounted) {
+      _checkInProgress = false;
       return;
     }
 
     if (isOnline) {
+      _checkInProgress = false;
       _hasNavigated = true;
       Navigator.of(context).pushReplacementNamed('/landing');
     } else {
+      _checkInProgress = false;
       setState(() {
         _connectionState = _SplashConnectionState.offline;
       });
-      _checkInProgress = false;
     }
   }
 
