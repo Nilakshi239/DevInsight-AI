@@ -6,8 +6,8 @@ import '../../../../core/constants/app_colors.dart';
 
 /// Clean, high-contrast Splash reveal:
 /// ONLY the Logo and Name ("DevInsight") are visible on a pure white background.
-/// Features snappy, elastic spring physics for the logo and high-contrast typography
-/// (deep obsidian "Dev" and radiant blue "Insight" that stay completely visible).
+/// Features snappy, elastic spring physics for the logo and a kinetic letter-by-letter
+/// cascade animation for "DevInsight" inspired by After Effects / modern SaaS motion.
 class LogoRevealView extends StatelessWidget {
   final AnimationController revealController;
   final bool isCompact;
@@ -19,6 +19,8 @@ class LogoRevealView extends StatelessWidget {
     required this.isCompact,
     required this.loadingArea,
   });
+
+  static const String _brandName = 'DevInsight';
 
   @override
   Widget build(BuildContext context) {
@@ -36,21 +38,14 @@ class LogoRevealView extends StatelessWidget {
         // 2. Elastic Spring Scale & Rotation (Slack-inspired snappy overshoot): 0.08 -> 0.58
         final logoEnterVal = ((val - 0.08) / 0.50).clamp(0.0, 1.0);
         final logoScale = 0.25 + 0.75 * Curves.easeOutBack.transform(logoEnterVal);
-        final logoRotation = (1.0 - Curves.easeOutBack.transform(logoEnterVal)) * -0.10;
+        final logoRotation =
+            (1.0 - Curves.easeOutBack.transform(logoEnterVal)) * -0.10;
         final logoOpacity = Curves.easeOutCubic.transform(logoEnterVal);
 
         // 3. Specular Light Sweep Sheen on Logo: 0.42 -> 0.85
         final shimmerVal = ((val - 0.42) / 0.43).clamp(0.0, 1.0);
         final shimmerProgress =
             -1.0 + 3.0 * Curves.easeInOutCubic.transform(shimmerVal);
-
-        // 4. Kinetic Typography Reveal ("DevInsight"): 0.38 -> 0.80
-        final textEnterVal = ((val - 0.38) / 0.42).clamp(0.0, 1.0);
-        final textOpacity = Curves.easeOutQuad.transform(textEnterVal);
-        final textSlide =
-            (1.0 - Curves.easeOutCubic.transform(textEnterVal)) * 26.0;
-        final letterSpacing =
-            1.8 - (3.2 * Curves.easeOutCubic.transform(textEnterVal));
 
         return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: isCompact ? 420 : 780),
@@ -121,38 +116,51 @@ class LogoRevealView extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // ==================== HIGH-CONTRAST BRAND NAME ("DevInsight") ====================
-              Opacity(
-                opacity: textOpacity,
-                child: Transform.translate(
-                  offset: Offset(0, textSlide),
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Dev',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: const Color(0xFF0F172A), // Deep obsidian black
-                            fontSize: titleSize,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: letterSpacing,
-                            height: 1.15,
+              // ==================== LETTER-BY-LETTER KINETIC CASCADE ====================
+              Semantics(
+                label: 'DevInsight',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(_brandName.length, (index) {
+                    final isDev = index < 3; // "Dev" in obsidian, "Insight" in blue
+                    final letterColor = isDev
+                        ? const Color(0xFF0F172A)
+                        : AppColors.primaryBlue;
+
+                    // Staggered timing for each letter (cascade wave)
+                    final letterStart = 0.36 + index * 0.034;
+                    const letterDuration = 0.25;
+                    final letterVal =
+                        ((val - letterStart) / letterDuration).clamp(0.0, 1.0);
+
+                    // Spring pop & slide for each individual letter
+                    final easeSpring =
+                        Curves.easeOutBack.transform(letterVal);
+                    final letterOpacity =
+                        Curves.easeOutQuad.transform(letterVal);
+                    final letterSlideY = (1.0 - easeSpring) * 32.0;
+                    final letterScale = 0.65 + 0.35 * easeSpring;
+
+                    return Transform.translate(
+                      offset: Offset(0, letterSlideY),
+                      child: Transform.scale(
+                        scale: letterScale,
+                        child: Opacity(
+                          opacity: letterOpacity,
+                          child: Text(
+                            _brandName[index],
+                            style: GoogleFonts.plusJakartaSans(
+                              color: letterColor,
+                              fontSize: titleSize,
+                              fontWeight: FontWeight.w800,
+                              height: 1.15,
+                            ),
                           ),
                         ),
-                        TextSpan(
-                          text: 'Insight',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: AppColors.primaryBlue, // Radiant Electric Blue
-                            fontSize: titleSize,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: letterSpacing,
-                            height: 1.15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  }),
                 ),
               ),
 
