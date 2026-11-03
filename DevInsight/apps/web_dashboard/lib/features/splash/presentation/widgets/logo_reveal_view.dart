@@ -4,9 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 
-/// Clean, high-impact Splash reveal:
+/// Clean, high-contrast Splash reveal:
 /// ONLY the Logo and Name ("DevInsight") are visible on a pure white background.
-/// Features snappy, elastic spring physics and specular gleam inspired by modern SaaS motion.
+/// Features snappy, elastic spring physics for the logo and high-contrast typography
+/// (deep obsidian "Dev" and radiant blue "Insight" that stay completely visible).
 class LogoRevealView extends StatelessWidget {
   final AnimationController revealController;
   final bool isCompact;
@@ -38,7 +39,7 @@ class LogoRevealView extends StatelessWidget {
         final logoRotation = (1.0 - Curves.easeOutBack.transform(logoEnterVal)) * -0.10;
         final logoOpacity = Curves.easeOutCubic.transform(logoEnterVal);
 
-        // 3. Specular Light Sweep Sheen: 0.42 -> 0.85
+        // 3. Specular Light Sweep Sheen on Logo: 0.42 -> 0.85
         final shimmerVal = ((val - 0.42) / 0.43).clamp(0.0, 1.0);
         final shimmerProgress =
             -1.0 + 3.0 * Curves.easeInOutCubic.transform(shimmerVal);
@@ -47,14 +48,9 @@ class LogoRevealView extends StatelessWidget {
         final textEnterVal = ((val - 0.38) / 0.42).clamp(0.0, 1.0);
         final textOpacity = Curves.easeOutQuad.transform(textEnterVal);
         final textSlide =
-            (1.0 - Curves.easeOutCubic.transform(textEnterVal)) * 28.0;
+            (1.0 - Curves.easeOutCubic.transform(textEnterVal)) * 26.0;
         final letterSpacing =
-            2.4 - (3.8 * Curves.easeOutCubic.transform(textEnterVal));
-
-        // 5. Typography Shimmer Sweep: 0.62 -> 0.95
-        final textShimmerVal = ((val - 0.62) / 0.33).clamp(0.0, 1.0);
-        final textShimmerProgress =
-            -0.5 + 2.0 * Curves.easeInOut.transform(textShimmerVal);
+            1.8 - (3.2 * Curves.easeOutCubic.transform(textEnterVal));
 
         return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: isCompact ? 420 : 780),
@@ -98,7 +94,7 @@ class LogoRevealView extends StatelessWidget {
                                   semanticLabel: 'DevInsight logo',
                                 ),
 
-                                // Specular light sweep sheen overlay
+                                // Specular light sweep sheen overlay on logo
                                 if (shimmerVal > 0.0 && shimmerVal < 1.0)
                                   SizedBox(
                                     width: logoSize,
@@ -123,101 +119,39 @@ class LogoRevealView extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
-              // ==================== BRAND NAME REVEAL ("DevInsight") ====================
+              // ==================== HIGH-CONTRAST BRAND NAME ("DevInsight") ====================
               Opacity(
                 opacity: textOpacity,
                 child: Transform.translate(
                   offset: Offset(0, textSlide),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Dev',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: const Color(0xFF0F172A),
-                                fontSize: titleSize,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: letterSpacing,
-                                height: 1.15,
-                              ),
-                            ),
-                            TextSpan(
-                              text: 'Insight',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: AppColors.primaryBlue,
-                                fontSize: titleSize,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: letterSpacing,
-                                height: 1.15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Specular light sheen sweep across typography
-                      if (textShimmerVal > 0.0 && textShimmerVal < 1.0)
-                        IgnorePointer(
-                          child: ShaderMask(
-                            shaderCallback: (bounds) {
-                              final sweepWidth = bounds.width * 0.35;
-                              final startX = (bounds.width + sweepWidth * 2) *
-                                      textShimmerProgress -
-                                  sweepWidth;
-                              return LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  Colors.white.withValues(alpha: 0.0),
-                                  Colors.white.withValues(alpha: 0.8),
-                                  const Color(0xFF38BDF8)
-                                      .withValues(alpha: 0.9),
-                                  Colors.white.withValues(alpha: 0.8),
-                                  Colors.white.withValues(alpha: 0.0),
-                                ],
-                                stops: const [0.0, 0.35, 0.50, 0.65, 1.0],
-                              ).createShader(
-                                Rect.fromLTWH(
-                                    startX, 0, sweepWidth, bounds.height),
-                              );
-                            },
-                            blendMode: BlendMode.srcATop,
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Dev',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      color: Colors.white,
-                                      fontSize: titleSize,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: letterSpacing,
-                                      height: 1.15,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: 'Insight',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      color: Colors.white,
-                                      fontSize: titleSize,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: letterSpacing,
-                                      height: 1.15,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Dev',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: const Color(0xFF0F172A), // Deep obsidian black
+                            fontSize: titleSize,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: letterSpacing,
+                            height: 1.15,
                           ),
                         ),
-                    ],
+                        TextSpan(
+                          text: 'Insight',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.primaryBlue, // Radiant Electric Blue
+                            fontSize: titleSize,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: letterSpacing,
+                            height: 1.15,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
